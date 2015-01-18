@@ -1,6 +1,5 @@
 
 #include <Servo.h> 
-#include <SoftwareSerial.h>
 
 // RFID //
 #define enablePin  10   // Connects to the RFID's ENABLE pin
@@ -54,6 +53,18 @@ void dispense()
   rfidData[0] = 0;         // Clear the buffer   
 }
 
+void receive_string() {
+  digitalWrite(enablePin, HIGH);
+  Serial.println(rfidData);       // The rfidData string should now contain the tag's unique ID with a null termination, so display it on the Serial Monitor
+  if (strcmp(ALLOWED, rfidData) == 0) {
+    Serial.println("ALLOWED");
+    dispense();
+  } else {
+    Serial.println("DENIED");
+  }
+  delay(1000);
+}
+
 void loop()
 {
   digitalWrite(enablePin, LOW);   // enable the RFID Reader
@@ -82,14 +93,4 @@ if (Serial.available() > 0) // If there are any bytes available to read, then th
   }
 }
 
-void receive_string() {
-  digitalWrite(enablePin, HIGH);
-  Serial.println(rfidData);       // The rfidData string should now contain the tag's unique ID with a null termination, so display it on the Serial Monitor
-  if (strcmp(ALLOWED, rfidData) == 0) {
-    Serial.println("ALLOWED");
-    dispense();
-  } else {
-    Serial.println("DENIED");
-  }
-  delay(1000);
-}
+
