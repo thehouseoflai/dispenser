@@ -1,0 +1,19 @@
+Rebuilding after the loss of my previous laptop.
+
+
+MQTT protocol:
+dispenser/ping: sent every 5 seconds when a device is connected.
+dispenser/$id/received: sent after receiving an RFID string.
+dispenser/$id: for sending commands to the device. It understands:
+  rfid_disable
+  rfid_enable
+
+rfid_enable pulls down the /ENABLE pin, and is supposed to switch the UART
+to the "alternate" RX pin (GPIO13 = D7). It then does detect the tag, but
+it sends me a bunch of garbage characters. Wrong port speed? Yep.
+
+It also seems to lag after detecting? Several detections in a row and the
+thing stops pinging completely. So, how about we introduce a timeout?
+
+
+

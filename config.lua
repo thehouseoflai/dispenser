@@ -8,7 +8,7 @@ module.PORT = 1883
 
 -- who am I
 module.ID = node.chipid()
-module.ENDPOINT = 'dispenser/'..node.chipid()
+module.ENDPOINT = 'dispenser/'
 
 
 return module

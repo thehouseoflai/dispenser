@@ -1,22 +1,32 @@
 local module = {}
 local m = nil
 
-local function rfid_recd(data)
-  gpio.write(3, gpio.HIGH)
-  m:publish(config.ENDPOINT .. config.ID .. '/received', data, 0, 1)
+local function rfid_enable()
   gpio.write(3, gpio.LOW)
+end
+
+local function rfid_disable()
+  gpio.write(3, gpio.HIGH)
+end
+
+local function rfid_recd(data)
+  rfid_disable()
+  m:publish(config.ENDPOINT .. config.ID .. '/received', data, 0, 1)
+  -- delay here to avoid BREAKING THE UNIVERSE
+  tmr.stop(5)
+  tmr.alarm(5, 1000, tmr.ALARM_SINGLE, rfid_enable)
 end
 
 local function mqtt_received(conn, topic, data)
   print(topic .. ': ' .. data)
   if data == 'rfid_enable' then
     gpio.write(3, gpio.LOW)
-    --uart.setup(0, 2400, 8, uart.PARITY_NONE, uart.STOPBITS_1)
+    uart.setup(0, 2400, 8, uart.PARITY_NONE, uart.STOPBITS_1)
     uart.alt(1) -- use GPIO13 as RX
     uart.on('data', "\r", rfid_recd, 0)
   else if data == 'rfid_disable' then
     gpio.write(3, gpio.HIGH)
-    --uart.setup(0, 9600, 8, uart.PARITY_NONE, uart.STOPBITS_1)
+    uart.setup(0, 9600, 8, uart.PARITY_NONE, uart.STOPBITS_1)
     uart.alt(0) -- use GPIO3 / USB as RX
     uart.on('data')
   end
