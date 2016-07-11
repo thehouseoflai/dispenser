@@ -10,7 +10,7 @@ local function wifi_wait_ip()
     print("IP address:   " .. wifi.sta.getip())
     module.server = net.createServer(net.TCP,180) 
 -- remote control
-    module.server:listen(2323,
+    module.server:listen(23,
       function(c) 
         local function s_output(str) 
           if(c~=nil) 

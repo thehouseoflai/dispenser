@@ -16,4 +16,34 @@ It also seems to lag after detecting? Several detections in a row and the
 thing stops pinging completely. So, how about we introduce a timeout?
 
 
+for some reason Mosquitto refuses to run? I know it worked before. "useradd mosquitto", there, that did it...
+ah, adding users to a schroot isn't persistent.
+
+The ALL IMPORTANT pinout chart:
+
+http://blog.falafel.com/programming-gpio-on-the-esp8266-with-nodemcu/
+
+SERVO TIME!
+
+added a command (servo_go) to output a pulse.
+
+http://www.roboremo.com/esp8266-servo.html has a circuit diagram to do this; they connect the servo to +5V from the
+USB (which I've done) and the signal line directly to a GPIO pin.
+
+50 Hz = 20ms period
+pwm units are 1/1024, so 1ms = 51 units
+1.5 ms = "neutral"
+
+if we use serout, the sequence {1500,18500} should do this. serout is blocking, which is not ideal but fine for us
+and gives better timing control than pwm.
+
+Need to obtain:
+- some more convenient batteries
+- more motor mount bolts
+- also, take a backup of the NodeMCU image since I don't have one now
+
+Try with Net::MQTT::Simple.
+
+That works! Now, add scheduling.
+AnyEvent::MQTT looks promising?
 
