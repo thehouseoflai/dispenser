@@ -1,0 +1,68 @@
+#!/usr/bin/perl
+
+use AnyEvent::MQTT;
+use AnyEvent::DateTime::Cron;
+use App::Daemon 'daemonize';
+use strict;
+
+my $mqtt = AnyEvent::MQTT->new(host => 'localhost');
+
+# TODO: get the ID, tag, and timing from a database
+
+daemonize();
+
+my @config = (
+  {
+    id    => '16299908',
+    tag   => '070075D961',
+    cron  => '* * * * *',
+  }
+);
+
+my $cron = AnyEvent::DateTime::Cron->new->debug(1);
+
+my %ready; # id => status
+
+foreach my $entry (@config) {
+
+  my $id = $entry->{id};
+  my $tag = $entry->{tag};
+
+  $mqtt->publish(topic => "dispenser/$id", message => 'rfid_disable')->recv;
+
+  $mqtt->subscribe(
+    topic => "dispenser/$id/received",
+    callback => sub {
+      my ($topic, $message) = @_;
+      warn "[$topic] $message\n";
+      if ($message eq $tag and $ready{$id}) {
+        $mqtt->publish(topic => "dispenser/$id", message => 'servo_run')
+             ->recv;
+        $ready{$id} = 0;
+      }
+    },
+  )->recv;
+
+  $mqtt->subscribe(
+    topic => "dispenser/$id/received",
+    callback => sub {
+      my ($topic, $message) = @_;
+      warn "[$topic] $message\n";
+      if ($message eq $tag and $ready{$id}) {
+        $mqtt->publish(topic => "dispenser/$id", message => 'servo_run')
+             ->recv;
+        $ready{$id} = 0;
+      }
+    },
+  )->recv;
+
+  $cron->add( $entry->{cron},
+    sub {
+      warn "enabling device $id\n";
+      $ready{$id} = 1;
+      $mqtt->publish(topic => "dispenser/$id", message => 'rfid_enable')->recv;
+    },
+  );
+}
+
+$cron->start()->recv;

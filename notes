@@ -45,5 +45,16 @@ Need to obtain:
 Try with Net::MQTT::Simple.
 
 That works! Now, add scheduling.
-AnyEvent::MQTT looks promising?
+AnyEvent::MQTT looks promising... adapting to that took about 5 minutes.
 
+Except this is weird. The remote sends the tag and nothing happens. The
+state machine is crossed up--try storing the ready state globally.
+
+That's better. There are also problems with the RFID not turning off; maybe
+it's missing MQTT messages because it's busy doing the serout?
+No, the rfid_recd timer is reenabling it?
+
+
+
+Database backing!
+Simple schema: id, tag, cron spec

@@ -17,7 +17,6 @@ local function rfid_recd(data)
   m:publish(config.ENDPOINT .. config.ID .. '/received', data, 0, 0)
   -- delay here to avoid BREAKING THE UNIVERSE
   tmr.stop(5)
-  tmr.alarm(5, 3000, tmr.ALARM_SINGLE, rfid_enable)
 end
 
 local function servo_run()
@@ -28,13 +27,13 @@ end
 local function mqtt_received(conn, topic, data)
   print(topic .. ': ' .. data .. "\n")
   if data == 'rfid_enable' then
-    gpio.write(3, gpio.LOW)
+    rfid_enable()
     uart.setup(0, 2400, 8, uart.PARITY_NONE, uart.STOPBITS_1)
     uart.alt(1) -- use GPIO13 as RX
     uart.on('data', "\r", rfid_recd, 0)
   end
   if data == 'rfid_disable' then
-    gpio.write(3, gpio.HIGH)
+    rfid_disable()
     uart.setup(0, 9600, 8, uart.PARITY_NONE, uart.STOPBITS_1)
     uart.alt(0) -- use GPIO3 / USB as RX
     uart.on('data')
